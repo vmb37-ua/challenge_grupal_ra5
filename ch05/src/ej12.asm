@@ -47,6 +47,16 @@ SECTION "Ejercicio 12", ROM0
 ej12::   ;; = `game_handle_collisions`, que está en src/scn/scn_game_rules.asm
 
     ;; ◉◉YOUR CODE◉◉
+    call sys_shot_get
+    jr z, .ship
+    ld b, KIND_ENEMY
+    call sys_collision_update
+    call nz, game_enemy_hit
+    call sys_shot_get
+    jr z, .ship
+    ld b, KIND_BONUS
+    call sys_collision_update
+    call nz, game_bonus_shot
 
 .ship
     ld   hl, SHIP_ENTITY        ;; \ HL = the ship (the probe)
@@ -62,11 +72,11 @@ ej12::   ;; = `game_handle_collisions`, que está en src/scn/scn_game_rules.asm
     ret
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SI  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej12 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: OK (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> La nave, un disparo (Y=60, X=100) y una moneda encima (Y=62, X=100).
@@ -83,7 +93,7 @@ ej12::   ;; = `game_handle_collisions`, que está en src/scn/scn_game_rules.asm
 ;;   C110  00 3E 64 4F 00 00 00 08|.. .. .. .. .. .. .. ..|
 ;;  La moneda y el disparo desaparecen sin puntos (marcador 000, shot_entity = FF).
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> La nave, un disparo (Y=60, X=100), un asteroide encima (Y=62, X=100) y una moneda en el mismo sitio (entidad 3).
@@ -103,11 +113,11 @@ ej12::   ;; = `game_handle_collisions`, que está en src/scn/scn_game_rules.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    0 => 0     (1 fix = -1 tramo)
+;;  *  E:    0 => 0     (1 fix = -1 tramo)
+;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     0 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
