@@ -39,14 +39,34 @@ SECTION "Ejercicio 06", ROM0
 ;; ⚠️ Use memcpy8
 ej06::   ;; = `sys_prerender_one`, que está en src/sys/sys_prerender.asm
     ;; ◉◉YOUR CODE◉◉
+
+    ld a, [de]  ;; FIX N1: `ld de, [CMP_SPRITE]` no existe
+    and CMP_SPRITE ;; FIX N2: `and de` no existe
+    ret z
+
+    ld hl, E_SPRITE ;; FIX E1: falta la coma para separar la instrucción
+    add hl, de
+
+    ld a, [shadow_cursor]
+    ld e, a                     ;; FIX E1: el cursor es el byte bajo del DESTINO (E), no de HL (el origen)
+    ld d, HIGH(shadow_oam)      ;; FIX F1: falta el byte alto del destino: DE = HIGH(shadow_oam) : cursor
+    ld b, 4
+    call memcpy8
+
+    ld a, e
+    ld [shadow_cursor], a
+
+    ld a, e
+    ld [shadow_cursor], a
+
     ret ;; ◀━REMOVE RET IF NEEDED
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SÍ  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej06 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidad 0 (la nave, con SPRITE). shadow_cursor = 08 (un solo byte). La OAM sombra está llena de EE.
@@ -59,8 +79,8 @@ ej06::   ;; = `sys_prerender_one`, que está en src/sys/sys_prerender.asm
 ;;   C0B0  .. 0C 00 .. .. .. .. ..|.. .. .. .. .. .. .. ..|
 ;;  Los 4 bytes de la nave se copian en shadow_oam + 8 y el cursor pasa a 0C. Se muestran 2 bytes para comprobar que solo escribes UNO: el segundo es el dato que va detrás y no debe cambiar (00).
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
-;;
+;; * CASO 2: OK  (OK / Falla)
+;;SS
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidad con PHYSICS pero SIN SPRITE. shadow_cursor = 08. La OAM sombra, llena de EE.
 ;; [CPU]
@@ -75,11 +95,11 @@ ej06::   ;; = `sys_prerender_one`, que está en src/sys/sys_prerender.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    2 => 2     (1 fix = -1 tramo)
+;;  *  E:    1 => 1     (1 fix = -1 tramo)
+;;  *  S:    1 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    1 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     3 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
