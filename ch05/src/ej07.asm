@@ -42,14 +42,33 @@ SECTION "Ejercicio 07", ROM0
 ;; ⚠️ Use man_entity_for_each
 ej07::   ;; = `sys_prerender_update`, que está en src/sys/sys_prerender.asm
     ;; ◉◉YOUR CODE◉◉
-    ret ;; ◀━REMOVE RET IF NEEDED
+    ld a, low(shadow_oam)
+    ld [shadow_cursor], a
+
+    ld hl, sys_prerender_one
+    call man_entity_for_each
+
+    ld a, [shadow_cursor]       ;; FIX E1: se parte del valor, no de la variable
+    ld l, a
+    ld h, HIGH(shadow_oam)      ;; FIX F1: falta el byte high
+
+.hide                           ;; FIX E2: controlamos el bucle con l
+    ld a, l
+    cp SHADOW_OAM_SIZE          ;; FIX S1: cp con b no existe
+    ret nc                      ;; FIX E2: parte del error E2 del contador
+
+    ld [hl], 0                  ;; FIX F2: falta ocultar el sprite
+
+    add 4                       
+    ld l, a                     ;; FIX N1: ld shadow_cursor, hl no existe
+    jr .hide
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SÍ  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej07 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidades 0 (nave) y 2 (asteroide) con SPRITE. La OAM sombra, llena de EE (32 bytes). shadow_cursor vale 14 (le queda el valor de la pasada anterior).
@@ -63,7 +82,7 @@ ej07::   ;; = `sys_prerender_update`, que está en src/sys/sys_prerender.asm
 ;;   C0B0  .. 08 .. .. .. .. .. ..|.. .. .. .. .. .. .. ..|
 ;;  Los 2 sprites ocupan los 8 primeros bytes. Los 6 sprites que sobran se ocultan con SOLO su Y = 00 (cada 4 bytes); el resto de sus bytes sigue en EE. shadow_cursor = 08 (valía 14, pero la rutina lo pone a 00 al empezar).
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Ninguna entidad viva. La OAM sombra, llena de EE (32 bytes).
@@ -80,11 +99,11 @@ ej07::   ;; = `sys_prerender_update`, que está en src/sys/sys_prerender.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    1 => 1     (1 fix = -1 tramo)
+;;  *  E:    2 => 2     (1 fix = -1 tramo)
+;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    2 => 1     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     4 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
