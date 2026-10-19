@@ -38,25 +38,65 @@ SECTION "Ejercicio 02", ROM0
 ;; ❌ May modify A, BC, DE, HL
 ;; ⚠️ Use "call call_hl" to call the routine whose address is in HL
 ej02::   ;; = `man_entity_for_each`, que está en src/man/man_entity.asm
-
-    ;; ◉◉YOUR CODE◉◉
+    
+    push hl
+    ld hl, entity_array
+    ld bc, (MAX_ENTITIES-1)*SIZEOF_ENTITY
+    add hl, bc
+    ;;ld de, hl FIX: N -> No existe la instrucción
+    ld d, h
+    ld e, l
+    ;;
+    pop hl
 
 .next
     ld   a, [de]                ;; \ A = entity.CMP
     bit  CMP_ALIVE_BIT, a       ;; | Is it alive?
     jr   z, .skip               ;; / No (it is free): skip it
 
-    ;; ◉◉YOUR CODE◉◉
+    push de
+    push bc
+    push hl
+    call call_hl
+    pop hl
+    pop bc
+    pop de
+
 .skip                           ;; .skip is required by line 47
-    ;; ◉◉YOUR CODE◉◉
+    push hl
+    ;;ld hl, de FIX: N -> No existe la instrucción
+    ld h, d
+    ld l, e
+    ;;
+    ld bc, -SIZEOF_ENTITY
+    add hl, bc
+    ;;ld de, hl FIX: N -> No existe la instrucción
+    ld d, h
+    ld e, l
+    ;;
+    pop hl
+
+    ;; FIX F 1 : Faltaba la comparacion con la parte alta
+    ld a, d
+    cp HIGH(entity_array)
+    jp c, .fin
+    jp nz, .next
+
+    ld a, e
+    cp LOW(entity_array)
+    
+    jp c, .fin
+    jp .next
+
+    .fin:
     ret ;; ◀━REMOVE RET IF NEEDED
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SÍ (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej02 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: ok  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidades 0, 2 y 5 vivas (solo CMP = 81). HL = tst_cb_log: apunta en tst_log el byte bajo de cada entidad y destruye todos los registros.
@@ -68,7 +108,7 @@ ej02::   ;; = `man_entity_for_each`, que está en src/man/man_entity.asm
 ;;  tst_log: byte bajo de cada entidad llamada, en orden. El último byte (C810) es tst_n: cuántas veces se llamó.
 ;;  Ahora se recorre de la última a la primera.
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: OK (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Las 8 entidades vivas. La rutina llamada destruye BC, DE y HL en cada llamada.
@@ -82,11 +122,11 @@ ej02::   ;; = `man_entity_for_each`, que está en src/man/man_entity.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    1 => 1     (1 fix = -1 tramo)
+;;  *  E:    0 => 0     (1 fix = -1 tramo)
+;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    1 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     -1 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
