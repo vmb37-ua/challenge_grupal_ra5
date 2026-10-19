@@ -43,7 +43,7 @@ SECTION "Ejercicio 03", ROM0
 ej03::   ;; = `sys_physics_one`, que está en src/sys/sys_physics.asm
     ld   a, [de]
     and  CMP_PHYSICS
-    ret  nz
+    ret  z
     ld   hl, E_VY
     add  hl, de
     ld   a, [hl+]
@@ -53,11 +53,12 @@ ej03::   ;; = `sys_physics_one`, que está en src/sys/sys_physics.asm
     add  hl, de
     ld   a, [hl]
     add  c
-    ld   [hl+], c
+    ld   [hl+], a
     ld   c, a
     ld   a, [hl]
     add  b
     ld   [hl], a
+    ld b,a
     ld   a, [de]
     and  CMP_INPUT
     jp   nz, sys_physics_limit_x
@@ -65,19 +66,20 @@ ej03::   ;; = `sys_physics_one`, que está en src/sys/sys_physics.asm
     cp   ENTITY_OUT_Y
     jr   nc, .leaves
     ld   a, b
-    cp   ENTITY_OUT_Y
-    ret  nc
+    cp   ENTITY_OUT_X
+    ret  c ;; FIX <E><1>: Habia que dejar solo el carry en vez de nc
     ld   hl, E_VX
     add  hl, de
-    ld   a, [hl]
+    ld   a, [hl] ;; FIX <E><2>: No era hl+
     cpl
+    add 1
     ld   [hl], a
     ret
 .leaves
     jp   man_entity_free
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: __SI__  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej03 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,10 +107,10 @@ ej03::   ;; = `sys_physics_one`, que está en src/sys/sys_physics.asm
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
 ;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
+;;  *  E:    _2_ => _2_     (1 fix = -1 tramo)
 ;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
 ;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;      TOTAL:     _2_ tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *

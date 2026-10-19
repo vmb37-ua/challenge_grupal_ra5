@@ -49,14 +49,26 @@ ej09::   ;; = `sys_collision_overlaps`, que está en src/sys/sys_collision.asm
 .y_positive
 
     ;; ◉◉YOUR CODE◉◉
-    ret ;; ◀━REMOVE RET IF NEEDED
+    cp HIT_H
+    ret z
+    inc de 
+    inc hl
+    ld a,[de]
+    sub [hl]
+    jr nc, .x_positive
+    cpl
+    inc a
+.x_positive
+    cp HIT_W
+    ret z
+
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: __SI__  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej09 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: __OK__  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidad 1 en (Y=50, X=50) y entidad 2 en (Y=53, X=56). DE = entidad 1, HL = entidad 2. HIT_H = 5, HIT_W = 7.
@@ -64,7 +76,7 @@ ej09::   ;; = `sys_collision_overlaps`, que está en src/sys/sys_collision.asm
 ;;    flag Z: 1   ← Z = se solapan · NZ = no
 ;;  |dY| = 3 < 5 y |dX| = 6 < 7: se solapan.
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: __OK__  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Entidad 1 en (Y=50, X=50) y entidad 2 en (Y=50, X=57). DE = entidad 1, HL = entidad 2.
