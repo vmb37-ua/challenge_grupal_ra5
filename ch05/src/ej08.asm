@@ -36,14 +36,20 @@ SECTION "Ejercicio 08", ROM0
 ;; ⚠️ Use wait_vblank and memcpy8
 ej08::   ;; = `sys_render_update`, que está en src/sys/sys_render.asm
     ;; ◉◉YOUR CODE◉◉
+    call wait_vblank
+    ld hl, shadow_oam
+    ld b, SHADOW_OAM_SIZE
+    ld de, ENTITIES_OAM
+    call memcpy8
+
     ret ;; ◀━REMOVE RET IF NEEDED
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SÍ  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej08 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> La OAM sombra tiene 00, 01, 02 ... 9F (160 bytes).
@@ -54,7 +60,7 @@ ej08::   ;; = `sys_render_update`, que está en src/sys/sys_render.asm
 ;;   FE30  10 11 12 13 14 15 16 17|18 19 1A 1B 1C 1D 1E 1F|
 ;;  Los 32 bytes se copian a la OAM a partir del sprite 8 (FE20), no del 0.
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> La OAM sombra tiene 80, 81 ... (160 bytes). Antes, la OAM FE00-FE5F se llena con 77.
@@ -72,11 +78,11 @@ ej08::   ;; = `sys_render_update`, que está en src/sys/sys_render.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    0 => 0     (1 fix = -1 tramo)
+;;  *  E:    0 => 0     (1 fix = -1 tramo)
+;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     0 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
