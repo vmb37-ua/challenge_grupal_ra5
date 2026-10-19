@@ -39,6 +39,11 @@ SECTION "Ejercicio 10", ROM0
 ;; ⚠️ Use sys_collision_overlaps and man_entity_free
 ej10::   ;; = `sys_collision_one`, que está en src/sys/sys_collision.asm
     ;; ◉◉YOUR CODE◉◉
+    ld a,[de]
+    bit CMP_COLLIDER_BIT,a
+    ret z
+    
+
     ld   hl, E_KIND             ;; \ HL = &candidate.KIND
     add  hl, de                 ;; |
     ld   a, [collision_mask]    ;; | A = collision_mask & candidate.KIND:
@@ -46,14 +51,32 @@ ej10::   ;; = `sys_collision_one`, que está en src/sys/sys_collision.asm
     ret  z                      ;; / No: ignore it
 
     ;; ◉◉YOUR CODE◉◉
+    ;;FIX <F><1>: Faltaba ignorar la candidata cuando collision_hits ya no es 0
+    ld a, [collision_hits]
+    or a
+    ret nz
+    ;;ld hl, [collision_probe]
+    ;;FIX <N><1>: La instruccion ld hl, [collision_probe], no existe debido a que hl son 2 bytes y collision_probe es el comienzo de la dirección de la prueba, por lo que tenemos que hacerlo 1 a 1 con los registros de hl
+    push de
+    ld a, [collision_probe]
+    ld l, a
+    ld a, [collision_probe+1]
+    ld h,a
+    ;;
+    call sys_collision_overlaps
+    ret nz
+    pop de
+    ld hl, collision_hits
+    inc [hl]
+    jp man_entity_free
     ret ;; ◀━REMOVE RET IF NEEDED
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: SI  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej10 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: OK (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Sonda = la nave (entidad 0, Y=144, X=84). Máscara = KIND_ENEMY. collision_hits = 0. Candidata: asteroide en (Y=140, X=88), entidad 3.
@@ -67,7 +90,7 @@ ej10::   ;; = `sys_collision_one`, que está en src/sys/sys_collision.asm
 ;;  collision_probe, collision_mask y collision_hits van seguidos.
 ;;  collision_hits = 01 y la candidata queda libre (CMP = 00).
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 2: ____  (OK / Falla)
+;; * CASO 2: OK  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Igual, pero collision_hits ya vale 01: la sonda ya ha golpeado a otra entidad en esta pasada.
@@ -83,11 +106,11 @@ ej10::   ;; = `sys_collision_one`, que está en src/sys/sys_collision.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
-;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  N:    1 => 1     (1 fix = -1 tramo)
+;;  *  E:    0 => 0     (1 fix = -1 tramo)
+;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;  *  F:    1 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     1 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
