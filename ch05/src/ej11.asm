@@ -36,7 +36,11 @@ SECTION "Ejercicio 11a", ROM0
 ;; ⚠️ Use input_pressed (the "edge") and scene_change
 ej11a::   ;; = `scene_menu_update`, que está en src/scn/scn_menu.asm
     ;; ◉◉YOUR CODE◉◉
-    ret ;; ◀━REMOVE RET IF NEEDED
+        ld a,[input_pressed]
+        and BTN_START | BTN_A
+        ret z
+        ld hl,scene_game
+        jp scene_change
 
 SECTION "Ejercicio 11b", ROM0
 
@@ -49,14 +53,26 @@ SECTION "Ejercicio 11b", ROM0
 ;; ⚠️ Use input_pressed (the "edge") and scene_change
 ej11b::   ;; = `scene_gameover_update`, que está en src/scn/scn_gameover.asm
     ;; ◉◉YOUR CODE◉◉
-    ret ;; ◀━REMOVE RET IF NEEDED
+
+        ld a,[input_pressed]
+        and BTN_START
+        jr nz, .menu
+        ld a,[input_pressed] ;; FIX <F><1>: Faltaba recargar A despues del AND
+        and BTN_A
+        ret z
+        ld hl,scene_game
+        jp scene_change
+
+        .menu
+        ld hl,scene_menu
+        jp scene_change
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: __SI__  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej11 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: __OK__  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Escena actual = menú. Se acaba de pulsar A (no START). Llamamos a la actualización del menú (ej11a).
@@ -82,8 +98,8 @@ ej11b::   ;; = `scene_gameover_update`, que está en src/scn/scn_gameover.asm
 ;;  *  N:    __ => __     (1 fix = -1 tramo)
 ;;  *  E:    __ => __     (1 fix = -1 tramo)
 ;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;  *  F:    _1_ => _0_     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     _0_ tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
