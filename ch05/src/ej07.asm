@@ -99,11 +99,11 @@ ej07::   ;; = `sys_prerender_update`, que está en src/sys/sys_prerender.asm
 ;; ==========================================================
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
-;;  *  N:    1 => 1     (1 fix = -1 tramo)
-;;  *  E:    2 => 2     (1 fix = -1 tramo)
+;;  *  N:    1 => -1     (1 fix = -1 tramo)
+;;  *  E:    2 => -2     (1 fix = -1 tramo)
 ;;  *  S:    0 => 0     (2 fix = -1 tramo. En grupos de 2 solo)
-;;  *  F:    2 => 1     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     4 tramos
+;;  *  F:    2 => -1     (2 fix = -1 tramo. En grupos de 2 solo)
+;;      TOTAL:     -4 tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
