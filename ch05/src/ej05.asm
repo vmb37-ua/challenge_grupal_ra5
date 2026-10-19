@@ -43,14 +43,25 @@ ej05::   ;; = `sys_shot_update`, que está en src/sys/sys_shot.asm
     ret  z                      ;; / No: nothing to do
 
     ;; ◉◉YOUR CODE◉◉
+    ld a,l
+    add E_KIND
+    ld l,a
+    ld a,[hl]
+    cp KIND_SHOT
+    jr nz, .forget
+    ret
+
+    .forget
+    ld a, SHOT_NONE ;; FIX <E><1>: xor no ponia en FF, ponia 0
+    ld [shot_entity],a
     ret ;; ◀━REMOVE RET IF NEEDED
 
 ;; ==========================================================
-;;  ENSAMBLA: ____  (SÍ / NO)
+;;  ENSAMBLA: __SI__  (SÍ / NO)
 ;; === CASOS DE PRUEBA   (test_ej05 en main.asm)
 ;;  * Comprobar que CPU y MEM coinciden con el valor esperado
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;; * CASO 1: ____  (OK / Falla)
+;; * CASO 1: __OK__  (OK / Falla)
 ;;
 ;;        >>>>> RESULTADO ESPERADO (Comprobar) <<<<<
 ;; [PREVIO]> Disparo en la entidad 1: Y = 100, X = 60 (shot_entity = 08). Llamamos a sys_shot_update (ej05).
@@ -83,10 +94,10 @@ ej05::   ;; = `sys_shot_update`, que está en src/sys/sys_shot.asm
 ;; === FIXES
 ;;  Tipo: Cant. => Tramos
 ;;  *  N:    __ => __     (1 fix = -1 tramo)
-;;  *  E:    __ => __     (1 fix = -1 tramo)
+;;  *  E:    _1_ => _1_     (1 fix = -1 tramo)
 ;;  *  S:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
 ;;  *  F:    __ => __     (2 fix = -1 tramo. En grupos de 2 solo)
-;;      TOTAL:     __ tramos
+;;      TOTAL:     _1_ tramos
 ;;
 ;; EXPLICACIONES ADICIONALES DE FIXES (si es necesario)
 ;;  *
